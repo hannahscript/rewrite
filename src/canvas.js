@@ -37,16 +37,18 @@ function draw() {
     const axiom = getValue('axiom');
     const iterations = +getValue('iterations');
     const rules = getRules();
-    const angle = (+getValue('angle')) / 180 * Math.PI;
+    const initialAngle = (+getValue('initialAngle')) / 180 * Math.PI;
+    const turnAngle = (+getValue('turnAngle')) / 180 * Math.PI;
+    const branchLength = getValue('branchLength');
     const x = +getValue('x');
     const y = +getValue('y');
     const randomness = document.getElementById('randomness').checked;
 
     const program = generateProgram(axiom, rules, iterations);
-    const state = {pos: {x, y}, angle, stack: []};
+    const state = {pos: {x, y}, angle: initialAngle, stack: []};
 
     for (const cmd of program) {
-        run(cmd, state, randomness);
+        run(cmd, state, turnAngle, branchLength, randomness);
     }
 }
 
@@ -60,10 +62,7 @@ function generateProgram(axiom, rules, iterations) {
     return term.split('');
 }
 
-function run(cmd, state, randomness) {
-    const lenx = 5;
-    const turn = 35 / 180 * Math.PI;
-
+function run(cmd, state, turn, lenx, randomness) {
     if (cmd === 'F' || cmd === 'G') {
         let len = (randomness ? Math.max(0.5 * lenx, Math.random() * lenx) : lenx);
         const newPos = {x: state.pos.x + len * Math.cos(state.angle), y: state.pos.y + len * Math.sin(state.angle)};
