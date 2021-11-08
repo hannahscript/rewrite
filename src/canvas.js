@@ -7,15 +7,18 @@ const ctx = canvas.getContext('2d');
 document.getElementById('rules').value = 'X -> F+[[X]-X]-F[-FX]+X\nF -> FF'
 resetCanvas();
 draw();
+
 function resetCanvas() {
     ctx.clearRect(0, 0, 500, 500);
     ctx.beginPath();
     ctx.rect(0, 0, 500, 500);
     ctx.stroke();
 }
+
 function getValue(id) {
     return document.getElementById(id).value;
 }
+
 function getRules() {
     return getValue('rules')
         .split('\n')
@@ -24,6 +27,7 @@ function getRules() {
             return {from, to};
         })
 }
+
 function draw() {
     resetCanvas();
     const axiom = getValue('axiom');
@@ -42,6 +46,7 @@ function draw() {
         run(cmd, state, turnAngle, branchLength, randomness);
     }
 }
+
 function generateProgram(axiom, rules, iterations) {
     let term = axiom;
     for (let i = 0; i < iterations; i++) {
@@ -49,6 +54,7 @@ function generateProgram(axiom, rules, iterations) {
     }
     return term.split('');
 }
+
 function run(cmd, state, turn, lenx, randomness) {
     if (cmd === 'F' || cmd === 'G') {
         let len = (randomness ? Math.max(0.5 * lenx, Math.random() * lenx) : lenx);
@@ -59,15 +65,19 @@ function run(cmd, state, turn, lenx, randomness) {
         ctx.moveTo(state.pos.x, state.pos.y);
         ctx.lineTo(newPos.x, newPos.y);
         ctx.stroke();
-        ctx.fillStyle = '#f68e39';
         state.pos = newPos;
     } else if (cmd === 'H') {
         let len = (randomness ? Math.max(0.5 * lenx, Math.random() * lenx) : lenx);
         state.pos = {x: state.pos.x + len * Math.cos(state.angle), y: state.pos.y + len * Math.sin(state.angle)};
     } else if (cmd === 'Z') {
-        ctx.beginPath();
-        ctx.ellipse(state.pos.x, state.pos.y, 3, 3, 10, 0, 2 * Math.PI);
-        ctx.fill();
+        if (!randomness || Math.random() > 0.9) {
+            const orange = '#f68e39';
+            const red = '#8d0606';
+            ctx.fillStyle = Math.random() > 0.5 ? orange : red;
+            ctx.beginPath();
+            ctx.ellipse(state.pos.x, state.pos.y, 3, 3, 10, 0, 2 * Math.PI);
+            ctx.fill();
+        }
     } else if (cmd === '+') {
         state.angle -= turn + (randomness ? Math.random() : 0) * 0.3;
     } else if (cmd === '-') {
