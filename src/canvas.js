@@ -23,7 +23,7 @@ function getRules() {
     return getValue('rules')
         .split('\n')
         .map(line => {
-            const [from, to] = line.replace(/\s/, '').split('->');
+            const [from, to] = line.replace(/\s+/g, '').split('->');
             return {from, to};
         })
 }
@@ -39,7 +39,8 @@ function draw() {
     const x = +getValue('x');
     const y = +getValue('y');
     const randomness = document.getElementById('randomness').checked;
-    const program = generateProgram(axiom, rules, iterations);
+    const program = generateProgram(axiom, rules, iterations, next);
+
     console.log(program.join(''));
     const state = {pos: {x, y}, angle: initialAngle, stack: []};
     for (const cmd of program) {
@@ -47,10 +48,10 @@ function draw() {
     }
 }
 
-function generateProgram(axiom, rules, iterations) {
+function generateProgram(axiom, rules, iterations, alg) {
     let term = axiom;
     for (let i = 0; i < iterations; i++) {
-        term = next(term.split(''), rules);
+        term = alg(term.split(''), rules);
     }
     return term.split('');
 }
@@ -60,7 +61,7 @@ function run(cmd, state, turn, lenx, randomness) {
         let len = (randomness ? Math.max(0.5 * lenx, Math.random() * lenx) : lenx);
         const newPos = {x: state.pos.x + len * Math.cos(state.angle), y: state.pos.y + len * Math.sin(state.angle)};
         ctx.strokeStyle = '#327230';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(state.pos.x, state.pos.y);
         ctx.lineTo(newPos.x, newPos.y);
