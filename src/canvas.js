@@ -20,12 +20,43 @@ function getValue(id) {
 }
 
 function getRules() {
-    return getValue('rules')
+    /*
+    const r = [
+        {
+            from: 'X',
+            total: 13,
+            outcomes: [
+                {p: 5, to: 'FF'},
+                {p: 5, to: 'FXF'},
+                {p: 3, to: 'AFF'}
+            ]
+        }
+    ];
+    */
+    const ungroupedRules = getValue('rules')
         .split('\n')
+        .filter(line => line.length > 0)
         .map(line => {
-            const [from, to] = line.replace(/\s+/g, '').split('->');
-            return {from, to};
-        })
+            const [from, p, to] = line.replace(/\s+/g, '').split(/-(\d+)?>/);
+            return {from, to, p: p === undefined ? 1 : +p};
+        });
+
+    const groups = {};
+    for (let rule of ungroupedRules) {
+        const from = rule.from;
+        if (!groups[from]) {
+            groups[from] = {
+                from,
+                total: 0,
+                outcomes: []
+            };
+        }
+
+        groups[from].total += rule.p;
+        groups[from].outcomes.push(rule);
+    }
+
+    return Object.values(groups);
 }
 
 function draw() {
@@ -33,6 +64,7 @@ function draw() {
     const axiom = getValue('axiom');
     const iterations = +getValue('iterations');
     const rules = getRules();
+    console.log(rules)
     const initialAngle = (+getValue('initialAngle')) / 180 * Math.PI;
     const turnAngle = (+getValue('turnAngle')) / 180 * Math.PI;
     const branchLength = getValue('branchLength');

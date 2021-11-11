@@ -2,13 +2,13 @@
     function next(initialTerm, rules) {
         let terms = [{product: false, term: initialTerm}];
 
-        for (const rule of rules) {
+        for (const stochasticRule of rules) {
             // todo remember start i
             for (let i = 0; i < terms.length; i++) {
                 if (terms[i].product) continue;
 
                 const currentTerm = terms[i].term;
-                const result = matchRule(currentTerm, rule);
+                const result = matchRule(currentTerm, stochasticRule);
 
                 if (result) {
                     terms.splice(i, 1, ...result);
@@ -19,7 +19,17 @@
         return terms.map(({product, term}) => product ? term : term.join('')).join('');
     }
 
-    function matchRule(term, rule) {
+    function pickRule(stochasticRule) {
+        // todo improve https://blog.bruce-hill.com/a-faster-weighted-random-choice
+        let remaining = Math.random() * stochasticRule.total;
+        for (let i = 0; i < stochasticRule.outcomes.length; i++) {
+            remaining -= stochasticRule.outcomes[i].p;
+            if (remaining < 0) return stochasticRule.outcomes[i];
+        }
+    }
+
+    function matchRule(term, stochasticRule) {
+        const rule = pickRule(stochasticRule);
         const pos = matchSlidingWindow(term, rule);
 
         if (pos < 0) {
